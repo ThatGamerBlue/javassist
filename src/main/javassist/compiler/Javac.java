@@ -137,7 +137,7 @@ public class Javac {
     {
         CtFieldWithInit f;
         Declarator d = fd.getDeclarator();
-        f = new CtFieldWithInit(gen.resolver.lookupClass(d),
+        f = new CtFieldWithInit(gen.resolver.lookupClass(d, gen.getThisClass()),
                                 d.getVariable().get(), gen.getThisClass());
         f.setModifiers(MemberResolver.getModifiers(fd.getModifiers()));
         if (fd.getInit() != null)
@@ -166,7 +166,7 @@ public class Javac {
                 return cons;
             }
             Declarator r = md.getReturn();
-            CtClass rtype = gen.resolver.lookupClass(r);
+            CtClass rtype = gen.resolver.lookupClass(r, gen.thisClass);
             recordReturnType(rtype, false);
             CtMethod method = new CtMethod(rtype, r.getVariable().get(),
                                        plist, gen.getThisClass());

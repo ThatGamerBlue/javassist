@@ -219,7 +219,7 @@ public class JvstCodeGen extends MemberCodeGen {
         if (isRefType(exprType) || arrayDim > 0)
             return;     // Object type.  do nothing.
 
-        CtClass clazz = resolver.lookupClass(exprType, arrayDim, className);
+        CtClass clazz = resolver.lookupClass(exprType, arrayDim, className, thisClass);
         if (clazz instanceof CtPrimitiveType) {
             CtPrimitiveType pt = (CtPrimitiveType)clazz;
             String wrapper = pt.getWrapperName();

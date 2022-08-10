@@ -254,7 +254,7 @@ public class MemberCodeGen extends CodeGen {
 
             decl.setLocalVar(var);
 
-            CtClass type = resolver.lookupClassByJvmName(decl.getClassName());
+            CtClass type = resolver.lookupClassByJvmName(decl.getClassName(), thisClass);
             decl.setClassName(MemberResolver.javaToJvmName(type.getName()));
             bc.addExceptionHandler(start, end, bc.currentPc(), type);
             bc.growStack(1);
@@ -322,7 +322,7 @@ public class MemberCodeGen extends CodeGen {
         if (expr.isArray())
             atNewArrayExpr(expr);
         else {
-            CtClass clazz = resolver.lookupClassByName(expr.getClassName());
+            CtClass clazz = resolver.lookupClassByName(expr.getClassName(), thisClass);
             String cname = clazz.getName();
             ASTList args = expr.getArguments();
             bytecode.addNew(cname);
@@ -515,7 +515,7 @@ public class MemberCodeGen extends CodeGen {
             int op = e.getOperator();
             if (op == MEMBER) {                 // static method
                 targetClass
-                    = resolver.lookupClass(((Symbol)e.oprand1()).get(), false);
+                    = resolver.lookupClass(((Symbol)e.oprand1()).get(), false, thisClass);
                 isStatic = true;
             }
             else if (op == '.') {
@@ -552,9 +552,9 @@ public class MemberCodeGen extends CodeGen {
                     }
 
                     if (arrayDim > 0)
-                        targetClass = resolver.lookupClass(javaLangObject, true);
+                        targetClass = resolver.lookupClass(javaLangObject, true, thisClass);
                     else if (exprType == CLASS /* && arrayDim == 0 */)
-                        targetClass = resolver.lookupClassByJvmName(className);
+                        targetClass = resolver.lookupClassByJvmName(className, thisClass);
                     else
                         badMethod();
                 }
@@ -1098,7 +1098,7 @@ public class MemberCodeGen extends CodeGen {
                  * is (# "java.lang.Integer" "TYPE"). 
                  */
                 CtField f = resolver.lookupField(((Symbol)e.oprand1()).get(),
-                                         (Symbol)e.oprand2());
+                                         (Symbol)e.oprand2(), thisClass);
                 resultStatic = true;
                 return f;
             }
@@ -1112,7 +1112,7 @@ public class MemberCodeGen extends CodeGen {
                      */
                     if (exprType == CLASS && arrayDim == 0)
                         f = resolver.lookupFieldByJvmName(className,
-                                                    (Symbol)e.oprand2());
+                                                    (Symbol)e.oprand2(), thisClass);
                     else if (acceptLength && arrayDim > 0
                              && ((Symbol)e.oprand2()).get().equals("length"))
                         return null;    // expr is an array length.
@@ -1136,7 +1136,7 @@ public class MemberCodeGen extends CodeGen {
                      */
                     Symbol fname = (Symbol)e.oprand2();
                     String cname = nfe.getField();
-                    f = resolver.lookupFieldByJvmName2(cname, fname, expr);
+                    f = resolver.lookupFieldByJvmName2(cname, fname, expr, thisClass);
                     resultStatic = true;
                     return f;
                 }
@@ -1164,7 +1164,7 @@ public class MemberCodeGen extends CodeGen {
             int i = 0;
             params = new CtClass[plist.length()];
             while (plist != null) {
-                params[i++] = resolver.lookupClass((Declarator)plist.head());
+                params[i++] = resolver.lookupClass((Declarator)plist.head(), thisClass);
                 plist = plist.tail();
             }
         }
@@ -1180,7 +1180,7 @@ public class MemberCodeGen extends CodeGen {
         int i = 0;
         clist = new CtClass[list.length()];
         while (list != null) {
-            clist[i++] = resolver.lookupClassByName((ASTList)list.head());
+            clist[i++] = resolver.lookupClassByName((ASTList)list.head(), thisClass);
             list = list.tail();
         }
 
@@ -1194,7 +1194,7 @@ public class MemberCodeGen extends CodeGen {
      */
     @Override
     protected String resolveClassName(ASTList name) throws CompileError {
-        return resolver.resolveClassName(name);
+        return resolver.resolveClassName(name, thisClass);
     }
 
     /* Expands a simple class name to java.lang.*.
@@ -1202,6 +1202,6 @@ public class MemberCodeGen extends CodeGen {
      */
     @Override
     protected String resolveClassName(String jvmName) throws CompileError {
-        return resolver.resolveJvmClassName(jvmName);
+        return resolver.resolveJvmClassName(jvmName, thisClass);
     }
 }

@@ -139,7 +139,7 @@ public class JvstTypeChecker extends TypeChecker {
         if (CodeGen.isRefType(exprType) || arrayDim > 0)
             return;     // Object type.  do nothing.
 
-        CtClass clazz = resolver.lookupClass(exprType, arrayDim, className);
+        CtClass clazz = resolver.lookupClass(exprType, arrayDim, className, thisClass);
         if (clazz instanceof CtPrimitiveType) {
             exprType = CLASS;
             arrayDim = 0;

@@ -1647,6 +1647,7 @@ public abstract class CodeGen extends Visitor implements Opcode, TokenId {
     protected abstract void atFieldRead(ASTree expr) throws CompileError;
 
     public void atClassObject(Expr expr) throws CompileError {
+        // todo: bug here, doesn't do the class resolution correctly like field search
         ASTree op1 = expr.oprand1();
         if (!(op1 instanceof Symbol))
             throw new CompileError("fatal error: badly parsed .class expr");

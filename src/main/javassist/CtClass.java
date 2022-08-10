@@ -348,6 +348,13 @@ public abstract class CtClass {
         return null;
     }
 
+    public boolean isArrayPrimitive() throws NotFoundException {
+        if (!isArray()) {
+            return isPrimitive();
+        }
+        return getComponentType().isArrayPrimitive();
+    }
+
     /**
      * Returns <code>true</code> if this class extends or implements
      * <code>clazz</code>.  It also returns <code>true</code> if

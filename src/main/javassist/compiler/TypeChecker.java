@@ -150,14 +150,14 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
      * For example, this converts Object into java/lang/Object.
      */
     protected String resolveClassName(ASTList name) throws CompileError {
-        return resolver.resolveClassName(name);
+        return resolver.resolveClassName(name, thisClass);
     }
 
     /* Expands a simple class name to java.lang.*.
      * For example, this converts Object into java/lang/Object.
      */
     protected String resolveClassName(String jvmName) throws CompileError {
-        return resolver.resolveJvmClassName(jvmName);
+        return resolver.resolveJvmClassName(jvmName, thisClass);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
         if (expr.isArray())
             atNewArrayExpr(expr);
         else {
-            CtClass clazz = resolver.lookupClassByName(expr.getClassName());
+            CtClass clazz = resolver.lookupClassByName(expr.getClassName(), thisClass);
             String cname = clazz.getName();
             ASTList args = expr.getArguments();
             atMethodCallCore(clazz, MethodInfo.nameInit, args);
@@ -681,7 +681,7 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
             if (op == MEMBER)                // static method
                 targetClass
                         = resolver.lookupClass(((Symbol)e.oprand1()).get(),
-                                               false);
+                                               false, thisClass);
             else if (op == '.') {
                 ASTree target = e.oprand1();
                 String classFollowedByDotSuper = isDotSuper(target);
@@ -706,9 +706,9 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
                     }
 
                     if (arrayDim > 0)
-                        targetClass = resolver.lookupClass(javaLangObject, true);
+                        targetClass = resolver.lookupClass(javaLangObject, true, thisClass);
                     else if (exprType == CLASS /* && arrayDim == 0 */)
-                        targetClass = resolver.lookupClassByJvmName(className);
+                        targetClass = resolver.lookupClassByJvmName(className, thisClass);
                     else
                         badMethod();
                 }
@@ -879,7 +879,7 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
             if (op == MEMBER) {
                 Member mem = (Member)e.oprand2();
                 CtField f
-                    = resolver.lookupField(((Symbol)e.oprand1()).get(), mem);
+                    = resolver.lookupField(((Symbol)e.oprand1()).get(), mem, thisClass);
                 mem.setField(f);
                 return f;
             }
@@ -902,7 +902,7 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
                 try {
                     if (exprType == CLASS && arrayDim == 0)
                         return resolver.lookupFieldByJvmName(className,
-                                                    (Symbol)e.oprand2());
+                                                    (Symbol)e.oprand2(), thisClass);
                 }
                 catch (CompileError ce) {
                     err = ce;
@@ -938,7 +938,7 @@ public class TypeChecker extends Visitor implements Opcode, TokenId {
 
     private CtField fieldAccess2(Expr e, String jvmClassName) throws CompileError {
         Member fname = (Member)e.oprand2();
-        CtField f = resolver.lookupFieldByJvmName2(jvmClassName, fname, e);
+        CtField f = resolver.lookupFieldByJvmName2(jvmClassName, fname, e, thisClass);
         e.setOperator(MEMBER);
         e.setOprand1(new Symbol(MemberResolver.jvmToJavaName(jvmClassName)));
         fname.setField(f);
